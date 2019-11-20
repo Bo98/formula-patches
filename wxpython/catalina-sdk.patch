@@ -73,7 +73,7 @@ diff --git a/ext/wxWidgets/configure b/ext/wxWidgets/configure
 index 3dea582d757f1d2f2726a921d434259fde651fee..0426df54c9a8103d7f90cea2784bec3de3aace79 100755
 --- a/ext/wxWidgets/configure
 +++ b/ext/wxWidgets/configure
-@@ -36394,33 +36394,8 @@ if test "$wxUSE_HTML" = "yes"; then
+@@ -36394,34 +36394,9 @@ if test "$wxUSE_HTML" = "yes"; then
      SAMPLES_SUBDIRS="$SAMPLES_SUBDIRS html html/about html/help html/helpview html/printing html/test html/virtual html/widget html/zip htlbox"
  fi
  if test "$wxUSE_WEBKIT" = "yes"; then
@@ -104,6 +104,7 @@ index 3dea582d757f1d2f2726a921d434259fde651fee..0426df54c9a8103d7f90cea2784bec3d
 -    elif test "$wxUSE_OLD_COCOA" = 1; then
 +    if test "$wxUSE_MAC" != 1 -a "$USE_DARWIN" != 1; then
          $as_echo "#define wxUSE_WEBKIT 1" >>confdefs.h
+ 
 -    else
          wxUSE_WEBKIT=no
      fi
