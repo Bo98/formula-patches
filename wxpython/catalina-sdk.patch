@@ -64,10 +64,13 @@ Subject: [PATCH 2/2] Remove configure tests for WebView headers under Mac
 They shouldn't be necessary, as these headers should be always available
 on all supported macOS versions, and they fail when using 10.15 SDK
 which doesn't include Carbon headers at all any more.
+
+[Homebrew edit] 4e5095e5a5090dd025efd9f8818e69e50ea68f67 is squashed into
+this diff.
 ---
- ext/wxWidgets/configure    | 50 +++-----------------------------------------------
- ext/wxWidgets/configure.in | 41 +++++------------------------------------
- 2 files changed, 8 insertions(+), 83 deletions(-)
+ ext/wxWidgets/configure    | 48 +++---------------------------------------------
+ ext/wxWidgets/configure.in | 39 +++++----------------------------------
+ 2 files changed, 8 insertions(+), 79 deletions(-)
 
 diff --git a/ext/wxWidgets/configure b/ext/wxWidgets/configure
 index 3dea582d757f1d2f2726a921d434259fde651fee..0426df54c9a8103d7f90cea2784bec3de3aace79 100755
@@ -77,7 +80,7 @@ index 3dea582d757f1d2f2726a921d434259fde651fee..0426df54c9a8103d7f90cea2784bec3d
      SAMPLES_SUBDIRS="$SAMPLES_SUBDIRS html html/about html/help html/helpview html/printing html/test html/virtual html/widget html/zip htlbox"
  fi
  if test "$wxUSE_WEBKIT" = "yes"; then
--    if test "$wxUSE_MAC" = 1 -a "$USE_DARWIN" = 1; then
+     if test "$wxUSE_MAC" = 1 -a "$USE_DARWIN" = 1; then
 -        old_CPPFLAGS="$CPPFLAGS"
 -        CPPFLAGS="-x objective-c++ $CPPFLAGS"
 -        ac_fn_c_check_header_compile "$LINENO" "WebKit/HIWebView.h" "ac_cv_header_WebKit_HIWebView_h" "
@@ -102,10 +105,10 @@ index 3dea582d757f1d2f2726a921d434259fde651fee..0426df54c9a8103d7f90cea2784bec3d
 -
 -        CPPFLAGS="$old_CPPFLAGS"
 -    elif test "$wxUSE_OLD_COCOA" = 1; then
-+    if test "$wxUSE_MAC" != 1 -a "$USE_DARWIN" != 1; then
          $as_echo "#define wxUSE_WEBKIT 1" >>confdefs.h
  
--    else
++        WEBKIT_LINK="-framework WebKit"
+     else
          wxUSE_WEBKIT=no
      fi
      if test "$wxUSE_WEBKIT" = "yes"; then
@@ -143,11 +146,12 @@ diff --git a/ext/wxWidgets/configure.in b/ext/wxWidgets/configure.in
 index bd15f7e34427b82de6a4d62da4aa09e58251d3cb..4a05cc5efec972d9cea978002f279ccccb416740 100644
 --- a/ext/wxWidgets/configure.in
 +++ b/ext/wxWidgets/configure.in
-@@ -7150,26 +7150,9 @@ if test "$wxUSE_HTML" = "yes"; then
+@@ -7150,26 +7150,11 @@ if test "$wxUSE_HTML" = "yes"; then
      SAMPLES_SUBDIRS="$SAMPLES_SUBDIRS html html/about html/help html/helpview html/printing html/test html/virtual html/widget html/zip htlbox"
  fi
  if test "$wxUSE_WEBKIT" = "yes"; then
--    if test "$wxUSE_MAC" = 1 -a "$USE_DARWIN" = 1; then
++    dnl This is only supported under Mac.
+     if test "$wxUSE_MAC" = 1 -a "$USE_DARWIN" = 1; then
 -        old_CPPFLAGS="$CPPFLAGS"
 -        CPPFLAGS="-x objective-c++ $CPPFLAGS"
 -        AC_CHECK_HEADER([WebKit/HIWebView.h],
@@ -165,10 +169,9 @@ index bd15f7e34427b82de6a4d62da4aa09e58251d3cb..4a05cc5efec972d9cea978002f279ccc
 -                        ])
 -        CPPFLAGS="$old_CPPFLAGS"
 -    elif test "$wxUSE_OLD_COCOA" = 1; then
-+    dnl This is only supported under Mac.
-+    if test "$wxUSE_MAC" != 1 -a "$USE_DARWIN" != 1; then
          AC_DEFINE(wxUSE_WEBKIT)
--    else
++        WEBKIT_LINK="-framework WebKit"
+     else
          wxUSE_WEBKIT=no
      fi
      if test "$wxUSE_WEBKIT" = "yes"; then
