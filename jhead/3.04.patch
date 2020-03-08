@@ -1,6 +1,6 @@
 --- a/makefile	2015-02-02 23:24:06.000000000 +0100
 +++ b/makefile	2015-02-25 16:31:21.000000000 +0100
-@@ -1,12 +1,18 @@
+@@ -1,14 +1,17 @@
  #--------------------------------
  # jhead makefile for Unix
  #--------------------------------
@@ -10,7 +10,9 @@
 +MANDIR=$(PREFIX)/share/man/man1
  OBJ=.
  SRC=.
- CFLAGS:= $(CFLAGS) -O3 -Wall
+-CPPFLAGS:=$(shell dpkg-buildflags --get CPPFLAGS)
+-CFLAGS:=$(shell dpkg-buildflags --get CFLAGS)
+-LDFLAGS:=$(shell dpkg-buildflags --get LDFLAGS)
 
  all: jhead
 
