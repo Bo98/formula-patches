@@ -37,7 +37,7 @@ index 9b27d9a..99f4e32 100644
 +  pclose(sw_vers);
 +
 +
-+  homebrew_sdkroot = getenv("HOMEBREW_SDKROOT");
++  char *homebrew_sdkroot = getenv("HOMEBREW_SDKROOT");
 +  if (homebrew_sdkroot != NULL)
 +  {
 +    define_global_variable("homebrew_sdkroot", homebrew_sdkroot);
