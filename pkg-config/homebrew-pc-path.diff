@@ -1,0 +1,55 @@
+diff --git a/main.c b/main.c
+index 9b27d9a..99f4e32 100644
+--- a/main.c
++++ b/main.c
+@@ -312,6 +312,50 @@ init_pc_path (void)
+   g_free (shpath);
+ #else
+   pkg_config_pc_path = PKG_CONFIG_PC_PATH;
++
++#ifdef __APPLE__
++  FILE *sw_vers = popen("/usr/bin/sw_vers -productVersion", "r");
++  if (sw_vers == NULL) return;
++
++  char buf[16];
++  if (fgets(buf, sizeof(buf), sw_vers) != NULL)
++  {
++    char *end = strchr(buf + 3, '.');
++    if (end != NULL)
++    {
++      *end = '\0';
++      gchar *homebrew_pc_path = g_strconcat(HOMEBREW_LIBRARY "/Homebrew/os/mac/pkgconfig/",
++                                            buf, NULL);
++      pkg_config_pc_path = g_strconcat(pkg_config_pc_path, G_SEARCHPATH_SEPARATOR_S,
++                                       homebrew_pc_path, NULL);
++      g_free(homebrew_pc_path);
++    }
++    else
++    {
++      *buf = '\0';
++    }
++  }
++  else
++  {
++    *buf = '\0';
++  }
++
++  pclose(sw_vers);
++
++
++  homebrew_sdkroot = getenv("HOMEBREW_SDKROOT");
++  if (homebrew_sdkroot != NULL)
++  {
++    define_global_variable("homebrew_sdkroot", homebrew_sdkroot);
++  }
++  else
++  {
++    gchar *clt_sdk = g_strconcat("/Library/Developer/CommandLineTools/SDKs/MacOSX",
++                                 buf, ".sdk", NULL);
++    define_global_variable("homebrew_sdkroot", clt_sdk);
++    g_free(clt_sdk);
++  }
++#endif
+ #endif
+ }
+ 
