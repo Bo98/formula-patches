@@ -1,0 +1,43 @@
+commit af77436275a142720544770f3b1cd7b634ed4fe0
+Author: Bo Anderson <mail@boanderson.me>
+Date:   Thu Mar 24 01:19:17 2022 +0000
+
+    [build] Propagate C++ headers to bootstrapping
+
+diff --git a/stdlib/public/SwiftShims/CMakeLists.txt b/stdlib/public/SwiftShims/CMakeLists.txt
+index fa1296fb9ef..af35e2334cc 100644
+--- a/stdlib/public/SwiftShims/CMakeLists.txt
++++ b/stdlib/public/SwiftShims/CMakeLists.txt
+@@ -98,6 +98,7 @@ if(NOT SWIFT_INCLUDE_TOOLS AND
+   message(STATUS "Using clang Resource Directory: ${clang_headers_location}")
+ else()
+   set(clang_headers_location "${LLVM_LIBRARY_OUTPUT_INTDIR}/clang/${CLANG_VERSION}")
++  set(cxx_include_location "${LLVM_INCLUDE_DIR}/c++")
+ endif()
+ 
+ if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+@@ -173,7 +174,23 @@ if(${LIBSWIFT_BUILD_MODE} MATCHES "BOOTSTRAPPING.*")
+ 
+         CUSTOM_TARGET_NAME ${target_name}
+         OUTPUT "${outdir}/shims" "${outdir}/clang"
+-        COMMENT "Symlinking headers for bootstrapping0")
++        COMMENT "Symlinking headers for bootstrapping${bootstrapping}")
++
++    if(EXISTS "${cxx_include_location}")
++      get_bootstrapping_path(cxx_outdir "${SWIFT_INCLUDE_DIR}/c++" ${bootstrapping})
++      set(cxx_target_name "symlink-cxx-headers-bootstrapping${bootstrapping}")
++
++      add_custom_command_target(unused_var
++        COMMAND
++          "${CMAKE_COMMAND}" "-E" "${cmake_symlink_option}"
++          "${cxx_include_location}" "${cxx_outdir}"
++
++        CUSTOM_TARGET_NAME ${cxx_target_name}
++        OUTPUT "${cxx_outdir}"
++        COMMENT "Symlinking C++ headers for bootstrapping${bootstrapping}")
++
++      add_dependencies(${target_name} ${cxx_target_name})
++    endif()
+ 
+     add_dependencies(${target_name} copy_shim_headers)
+   endforeach()
