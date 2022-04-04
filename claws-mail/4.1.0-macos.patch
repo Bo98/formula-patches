@@ -1,0 +1,98 @@
+From 16c3007de4c3e5974718eca3d16b377de81ab268 Mon Sep 17 00:00:00 2001
+From: Bo Anderson <mail@boanderson.me>
+Date: Mon, 14 Mar 2022 19:30:01 +0000
+Subject: [PATCH] Fix compile on non-X11 platforms.
+
+GtkSocket is only available under X11.
+---
+ src/compose.c | 22 +++++++++++-----------
+ 1 file changed, 11 insertions(+), 11 deletions(-)
+
+diff --git a/src/compose.c b/src/compose.c
+index 717bab642..3f2928966 100644
+--- a/src/compose.c
++++ b/src/compose.c
+@@ -374,11 +374,11 @@ static void compose_set_ext_editor_sensitive	(Compose	*compose,
+ 						 gboolean	 sensitive);
+ static gboolean compose_get_ext_editor_cmd_valid();
+ static gboolean compose_get_ext_editor_uses_socket();
+-#ifndef G_OS_WIN32
++#ifdef GDK_WINDOWING_X11
+ static gboolean compose_ext_editor_plug_removed_cb
+ 						(GtkSocket      *socket,
+ 						 Compose        *compose);
+-#endif /* G_OS_WIN32 */
++#endif /* GDK_WINDOWING_X11 */
+ 
+ static void compose_undo_state_changed		(UndoMain	*undostruct,
+ 						 gint		 undo_state,
+@@ -9631,11 +9631,11 @@ static gboolean compose_can_autosave(Compose *compose)
+ static void compose_exec_ext_editor(Compose *compose)
+ {
+ 	gchar *tmp;
+-#ifndef G_OS_WIN32
++#ifdef GDK_WINDOWING_X11
+ 	GtkWidget *socket;
+ 	Window socket_wid = 0;
+ 	gchar *p, *s;
+-#endif /* G_OS_WIN32 */
++#endif /* GDK_WINDOWING_X11 */
+ 	GPid pid;
+ 	GError *error = NULL;
+ 	gchar *cmd = NULL;
+@@ -9652,7 +9652,7 @@ static void compose_exec_ext_editor(Compose *compose)
+ 	}
+ 
+ 	if (compose_get_ext_editor_uses_socket()) {
+-#ifndef G_OS_WIN32
++#ifdef GDK_WINDOWING_X11
+ 		/* Only allow one socket */
+ 		if (compose->exteditor_socket != NULL) {
+ 			if (gtk_widget_is_focus(compose->exteditor_socket)) {
+@@ -9674,15 +9674,15 @@ static void compose_exec_ext_editor(Compose *compose)
+ 		socket_wid = gtk_socket_get_id(GTK_SOCKET (socket));
+ 		compose->exteditor_socket = socket;
+ #else
+-		alertpanel_error(_("Socket communication with an external editor is not available on Windows."));
++		alertpanel_error(_("Socket communication with an external editor is not available on non-X11 platforms."));
+ 		g_free(tmp);
+ 		return;
+-#endif /* G_OS_WIN32 */
++#endif /* GDK_WINDOWING_X11 */
+ 	}
+ 
+ 	if (compose_get_ext_editor_cmd_valid()) {
+ 		if (compose_get_ext_editor_uses_socket()) {
+-#ifndef G_OS_WIN32
++#ifdef GDK_WINDOWING_X11
+ 			p = g_strdup(prefs_common_get_ext_editor_cmd());
+ 			s = strstr(p, "%w");
+ 			s[1] = 'u';
+@@ -9691,7 +9691,7 @@ static void compose_exec_ext_editor(Compose *compose)
+ 			else
+ 				cmd = g_strdup_printf(p, socket_wid, tmp);
+ 			g_free(p);
+-#endif /* G_OS_WIN32 */
++#endif /* GDK_WINDOWING_X11 */
+ 		} else {
+ 			cmd = g_strdup_printf(prefs_common_get_ext_editor_cmd(), tmp);
+ 		}
+@@ -9931,14 +9931,14 @@ static gboolean compose_get_ext_editor_uses_socket()
+ 	        strstr(prefs_common_get_ext_editor_cmd(), "%w"));
+ }
+ 
+-#ifndef G_OS_WIN32
++#ifdef GDK_WINDOWING_X11
+ static gboolean compose_ext_editor_plug_removed_cb(GtkSocket *socket, Compose *compose)
+ {
+ 	compose->exteditor_socket = NULL;
+ 	/* returning FALSE allows destruction of the socket */
+ 	return FALSE;
+ }
+-#endif /* G_OS_WIN32 */
++#endif /* GDK_WINDOWING_X11 */
+ 
+ /**
+  * compose_undo_state_changed:
+-- 
+2.35.1
